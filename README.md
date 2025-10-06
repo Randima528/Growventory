@@ -7,8 +7,11 @@ Tech Stack: React.js | Pure Node.js | MySQL
 Key Features:
 
 CRUD operations for product management
-Simple and responsive user interface
+
+Simple and responsive user interface 
+
 RESTful API integration between frontend and backend
-Lightweight and easy to deploy
+
+Lightweight and easy to deploy 
 
 🚀 Built as an individual project to strengthen full-stack development skills using pure Node.js (without Express).
