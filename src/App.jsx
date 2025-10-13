@@ -1,6 +1,9 @@
 import "./App.css";
 import {Routes,Route, Navigate} from "react-router-dom"
-import Home from "./pages/Home";
+import Home from "./pages/Home"
+import AddProduct from "./pages/AddProduct"
+import Products from "./pages/Products"
+import Dashboard from "./pages/Dashboard";
 
 
 const App = () => {
@@ -8,6 +11,12 @@ const App = () => {
     
       
       <Routes>
+        <Route path="/products" element={<Products />} />
+         <Route path="/add-product" element={<AddProduct />} />
+         <Route path="/dashboard" element={<Dashboard />} />
+
+<Route path="/" element={<Navigate to="/products" />} />
+
 
          <Route path="/" element={<Home />} />
       </Routes>
