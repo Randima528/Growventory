@@ -13,22 +13,14 @@ import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { debounce } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 const ProductList = () => {
   const navigate = useNavigate();
 
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [products, setProducts] = useState([
-    { id: 1, name: "Product A", price: 10.0, stock: 15 },
-    { id: 2, name: "Product B", price: 20.0, stock: 5 },
-    { id: 3, name: "Product C", price: 30.0, stock: 0 },
-    { id: 4, name: "Product D", price: 25.0, stock: 8 },
-    { id: 5, name: "Product E", price: 12.5, stock: 20 },
-    { id: 6, name: "Product F", price: 18.75, stock: 3 },
-    { id: 7, name: "Product G", price: 22.0, stock: 7 },
-    { id: 8, name: "Product H", price: 15.0, stock: 0 },
-    { id: 9, name: "Product I", price: 27.5, stock: 12 },
-  ]);
+  const [products, setProducts] = useState([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -74,6 +66,8 @@ const ProductList = () => {
     }));
   };
 
+
+
   console.log("Current Product:", currentProduct);
 
   useEffect(() => {
@@ -81,7 +75,17 @@ const ProductList = () => {
   }, [searchTerm]);
 
   const fetchProducts = async () => {
-    
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await api.getProducts(searchTerm);
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("Failed to fetch products");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDelete = async (productId) => {
