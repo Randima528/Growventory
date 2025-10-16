@@ -5,6 +5,14 @@ const api = {
     fetch(
       `${API_URL}/products${searchTerm ? `?search=${searchTerm}` : ""}`
     ).then((res) => res.json()),
+    addProduct: (product) =>
+    fetch(`${API_URL}/products`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(product),
+    }).then((res) => res.json()),
   
 };
 

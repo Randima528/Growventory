@@ -44,7 +44,24 @@ const server = createServer((req, res) => {
               res.end(JSON.stringify(filteredProducts));
             }
           });
-        }else {
+        }else if (pathname === "/products" && method === "POST") {
+            let body = "";
+            req.on("data", (chunk) => {
+              body += chunk.toString();
+            });
+            req.on("end", () => {
+              const productData = JSON.parse(body);
+              productController.createProduct(productData, (err, result) => {
+                if (err) {
+                  res.writeHead(500, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ message: "Error creating product" }));
+                } else {
+                  res.writeHead(201, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ id: result.insertId, ...productData }));
+                }
+              });
+            });
+          }else {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Route not found" }));
   }

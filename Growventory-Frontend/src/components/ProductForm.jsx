@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Sidebar from "./Sidebar";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 const ProductForm = () => {
   const navigate = useNavigate();
@@ -20,8 +21,16 @@ const ProductForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    
-  };
+    e.preventDefault();
+    try {
+      await api.addProduct(product);
+      alert("Product added successfully");
+      setProduct({ name: "", price: "", stock: "" });
+      navigate("/products");
+    } catch (error) {
+      console.error("Failed to add product", error);
+    }
+    };
 
   return (
     <div className="app-layout">
