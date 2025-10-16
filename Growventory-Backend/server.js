@@ -61,7 +61,18 @@ const server = createServer((req, res) => {
                 }
               });
             });
-          }else {
+          }else if (pathname.match(/^\/products\/(\d+)$/) && method === "DELETE") {
+              const id = pathname.split("/")[2];
+              productController.deleteProduct(id, (err, result) => {
+                if (err) {
+                  res.writeHead(500, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ message: "Error deleting product" }));
+                } else {
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ message: `Product ${id} deleted` }));
+                }
+              });
+            }else {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Route not found" }));
   }

@@ -89,7 +89,12 @@ const ProductList = () => {
   };
 
   const handleDelete = async (productId) => {
-   
+   try {
+      await api.deleteProduct(productId);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
   };
 
   const handleUpdate = async (event) => {

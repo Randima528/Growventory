@@ -13,6 +13,10 @@ const api = {
       },
       body: JSON.stringify(product),
     }).then((res) => res.json()),
+    deleteProduct: (id) =>
+    fetch(`${API_URL}/products/${id}`, {
+      method: "DELETE",
+    }),
   
 };
 
