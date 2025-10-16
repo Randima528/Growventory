@@ -98,7 +98,23 @@ const ProductList = () => {
   };
 
   const handleUpdate = async (event) => {
-   
+   event.preventDefault();
+    if (!currentProduct || !currentProduct.id) return;
+    try {
+      const poductToUpdate = {
+        name: currentProduct.name,
+        price: currentProduct.price,
+        stock: currentProduct.stock,
+      };
+
+      await api.updateProduct(currentProduct.id, poductToUpdate);
+      fetchProducts();
+      setCurrentProduct(null);
+
+      console.log("Product updated successfully");
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
   };
 
   //  debounced search function

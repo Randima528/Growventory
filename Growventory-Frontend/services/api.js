@@ -13,6 +13,14 @@ const api = {
       },
       body: JSON.stringify(product),
     }).then((res) => res.json()),
+    updateProduct: (id, product) =>
+    fetch(`${API_URL}/products/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(product),
+    }).then((res) => res.json()),
     deleteProduct: (id) =>
     fetch(`${API_URL}/products/${id}`, {
       method: "DELETE",

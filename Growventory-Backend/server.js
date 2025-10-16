@@ -61,7 +61,25 @@ const server = createServer((req, res) => {
                 }
               });
             });
-          }else if (pathname.match(/^\/products\/(\d+)$/) && method === "DELETE") {
+          }else if (pathname.match(/^\/products\/(\d+)$/) && method === "PUT") {
+              const id = pathname.split("/")[2];
+              let body = "";
+              req.on("data", (chunk) => {
+                body += chunk.toString();
+              });
+              req.on("end", () => {
+                const productData = JSON.parse(body);
+                productController.updateProduct(id, productData, (err, result) => {
+                  if (err) {
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Error updating product" }));
+                  } else {
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: `Product ${id} updated` }));
+                  }
+                });
+              });
+            }else if (pathname.match(/^\/products\/(\d+)$/) && method === "DELETE") {
               const id = pathname.split("/")[2];
               productController.deleteProduct(id, (err, result) => {
                 if (err) {
