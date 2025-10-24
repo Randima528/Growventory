@@ -40,3 +40,83 @@ export const deleteProduct = (id, callback) => {
   });
 };
 
+// GET dashboard data with all metrics
+export const getDashboardData = (callback) => {
+  const sql = "SELECT * FROM products";
+  
+  db.query(sql, (err, products) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    // Calculate metrics
+    const totalProducts = products.length;
+    const totalValue = products.reduce((sum, p) => sum + (parseFloat(p.price) * parseInt(p.stock)), 0);
+    const outOfStock = products.filter(p => parseInt(p.stock) === 0).length;
+    const lowStock = products.filter(p => parseInt(p.stock) > 0 && parseInt(p.stock) < 10).length;
+    const inStock = products.filter(p => parseInt(p.stock) >= 10).length;
+    const avgPrice = totalProducts > 0 ? (products.reduce((sum, p) => sum + parseFloat(p.price), 0) / totalProducts) : 0;
+    const totalStock = products.reduce((sum, p) => sum + parseInt(p.stock), 0);
+
+    // Get low stock products (stock > 0 and stock < 10)
+    const lowStockProducts = products
+      .filter(p => parseInt(p.stock) > 0 && parseInt(p.stock) < 10)
+      .sort((a, b) => parseInt(a.stock) - parseInt(b.stock))
+      .slice(0, 5);
+
+    // Get out of stock products
+    const outOfStockProducts = products
+      .filter(p => parseInt(p.stock) === 0)
+      .slice(0, 5);
+
+    // Top products by value (price * stock)
+    const topProducts = [...products]
+      .map(p => ({
+        ...p,
+        totalValue: parseFloat(p.price) * parseInt(p.stock)
+      }))
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, 5);
+
+    // Prepare response
+    const dashboardData = {
+      metrics: {
+        totalProducts,
+        totalValue: totalValue.toFixed(2),
+        outOfStock,
+        lowStock,
+        inStock,
+        avgPrice: avgPrice.toFixed(2),
+        totalStock
+      },
+      lowStockProducts: lowStockProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: parseFloat(p.price),
+        stock: parseInt(p.stock)
+      })),
+      outOfStockProducts: outOfStockProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: parseFloat(p.price),
+        stock: parseInt(p.stock)
+      })),
+      topProducts: topProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: parseFloat(p.price),
+        stock: parseInt(p.stock),
+        totalValue: p.totalValue
+      })),
+      allProducts: products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: parseFloat(p.price),
+        stock: parseInt(p.stock)
+      }))
+    };
+
+    callback(null, dashboardData);
+  });
+};
