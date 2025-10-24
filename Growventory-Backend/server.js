@@ -27,7 +27,18 @@ const server = createServer((req, res) => {
     
       // Simple router
 
-      if (pathname === "/products" && method === "GET") {
+      // GET /dashboard - Get dashboard data with metrics
+  if (pathname === "/dashboard" && method === "GET") {
+    productController.getDashboardData((err, dashboardData) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Error fetching dashboard data" }));
+      } else {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(dashboardData));
+      }
+    });
+  }else if (pathname === "/products" && method === "GET") {
           const { search } = parsedUrl.query;
           productController.getAllProducts((err, products) => {
             if (err) {
