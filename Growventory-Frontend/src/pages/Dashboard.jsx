@@ -1,54 +1,99 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, AlertCircle, DollarSign, ShoppingCart } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import api from '../../services/api';
 
 const Dashboard = () => {
-  const [products] = useState([
-    { id: 1, name: "Product A", price: 10.0, stock: 15 },
-    { id: 2, name: "Product B", price: 20.0, stock: 5 },
-    { id: 3, name: "Product C", price: 30.0, stock: 0 },
-    { id: 4, name: "Product D", price: 25.0, stock: 8 },
-    { id: 5, name: "Product E", price: 12.5, stock: 20 },
-    { id: 6, name: "Product F", price: 18.75, stock: 3 },
-    { id: 7, name: "Product G", price: 22.0, stock: 7 },
-    { id: 8, name: "Product H", price: 15.0, stock: 0 },
-    { id: 9, name: "Product I", price: 27.5, stock: 12 },
-  ]);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Calculate dashboard metrics
-  const metrics = useMemo(() => {
-    const totalProducts = products.length;
-    const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-    const outOfStock = products.filter(p => p.stock === 0).length;
-    const lowStock = products.filter(p => p.stock > 0 && p.stock < 10).length;
-    const inStock = products.filter(p => p.stock >= 10).length;
-    const avgPrice = (products.reduce((sum, p) => sum + p.price, 0) / totalProducts).toFixed(2);
-    const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-    return {
-      totalProducts,
-      totalValue: totalValue.toFixed(2),
-      outOfStock,
-      lowStock,
-      inStock,
-      avgPrice,
-      totalStock,
-    };
-  }, [products]);
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:3000/dashboard');
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Get low stock products
-  const lowStockProducts = products
-    .filter(p => p.stock > 0 && p.stock < 10)
-    .sort((a, b) => a.stock - b.stock)
-    .slice(0, 5);
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '250px 1fr',
+        minHeight: '100vh',
+        background: '#f8fafc'
+      }}>
+        <Sidebar activeItem="dashboard" />
+        <div style={{ 
+          padding: '2rem', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          fontSize: '1.5rem',
+          color: '#64748b'
+        }}>
+          Loading dashboard data...
+        </div>
+      </div>
+    );
+  }
 
-  // Get out of stock products
-  const outOfStockProducts = products.filter(p => p.stock === 0).slice(0, 5);
+  if (error) {
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '250px 1fr',
+        minHeight: '100vh',
+        background: '#f8fafc'
+      }}>
+        <Sidebar activeItem="dashboard" />
+        <div style={{ padding: '2rem' }}>
+          <div style={{
+            background: '#fee2e2',
+            color: '#991b1b',
+            padding: '1rem',
+            borderRadius: '8px',
+            border: '1px solid #fca5a5'
+          }}>
+            {error}
+          </div>
+          <button 
+            onClick={fetchDashboardData}
+            style={{
+              marginTop: '1rem',
+              padding: '0.75rem 1.5rem',
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // Top products by value
-  const topProducts = [...products]
-    .sort((a, b) => (b.price * b.stock) - (a.price * a.stock))
-    .slice(0, 5);
+  if (!dashboardData) return null;
+
+  const { metrics, lowStockProducts, outOfStockProducts, topProducts } = dashboardData;
 
   return (
     <div style={{
@@ -57,8 +102,7 @@ const Dashboard = () => {
       minHeight: '100vh',
       background: '#f8fafc'
     }}>
-      
-      <Sidebar />
+      <Sidebar activeItem="dashboard" />
 
       <div style={{ padding: '2rem', overflowY: 'auto' }}>
         <div style={{
@@ -70,6 +114,19 @@ const Dashboard = () => {
           borderBottom: '1px solid #e2e8f0'
         }}>
           <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Dashboard</h1>
+          <button 
+            onClick={fetchDashboardData}
+            style={{
+              padding: '0.5rem 1rem',
+              background: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '0.875rem'
+            }}
+          >
+            Refresh Data
+          </button>
         </div>
 
         {/* KPI Stats */}
@@ -103,7 +160,9 @@ const Dashboard = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <DollarSign style={{ color: '#10b981', width: '24px', height: '24px' }} />
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#0f172a' }}>Rs.{parseFloat(metrics.totalValue).toLocaleString()}</div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#0f172a' }}>
+                  Rs.{parseFloat(metrics.totalValue).toLocaleString()}
+                </div>
                 <div style={{ color: '#64748b', fontSize: '0.875rem', marginTop: '0.5rem' }}>Inventory Value</div>
               </div>
             </div>
@@ -344,8 +403,10 @@ const Dashboard = () => {
               <tbody>
                 {topProducts.map(product => {
                   const totalInventoryValue = parseFloat(metrics.totalValue);
-                  const productValue = product.price * product.stock;
-                  const percentage = ((productValue / totalInventoryValue) * 100).toFixed(1);
+                  const productValue = product.totalValue;
+                  const percentage = totalInventoryValue > 0 
+                    ? ((productValue / totalInventoryValue) * 100).toFixed(1)
+                    : 0;
                   
                   return (
                     <tr key={product.id}>
