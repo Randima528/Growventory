@@ -25,6 +25,9 @@ const api = {
     fetch(`${API_URL}/products/${id}`, {
       method: "DELETE",
     }),
+    // Get dashboard data with metrics
+  getDashboardData: () =>
+    fetch(`${API_URL}/dashboard`).then((res) => res.json()),
   
 };
 
