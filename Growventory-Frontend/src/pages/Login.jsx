@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 const Login = () => {
-  const [email, setEmail] = useState('demo@example.com');
-  const [password, setPassword] = useState('demo123');
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,19 +16,41 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
+    // Basic validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
+    try {
+      const response = await api.login({ email, password });
+      
+      if (response.message === "Login successful") {
         setSuccess('✓ Login successful! Redirecting to dashboard...');
-        setEmail('');
-        setPassword('');
-      } else {
-        setError('Please fill in all fields');
+        
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify({
+          id: response.id,
+          name: response.name,
+          email: response.email
+        }));
+        
+        // Redirect to dashboard after 1 second
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else if (response.message) {
+        setError(response.message);
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred during login. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -149,6 +174,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 0.75rem 0.75rem 2.75rem',
@@ -194,6 +220,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 2.75rem 0.75rem 2.75rem',
@@ -232,9 +259,8 @@ const Login = () => {
           </div>
 
           {/* Login Button */}
-          <a href="/dashboard">
           <button
-            type="button"
+            type="submit"
             disabled={loading}
             style={{
               width: '100%',
@@ -255,7 +281,6 @@ const Login = () => {
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
-          </a>
 
           {/* Remember Me */}
           <div style={{
@@ -263,7 +288,7 @@ const Login = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             fontSize: '0.875rem',
-            marginBottom: '0.5 rem'
+            marginBottom: '0.5rem'
           }}>
             <label style={{
               display: 'flex',
@@ -289,8 +314,8 @@ const Login = () => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5 rem',
-          marginBottom: '0.5 rem'
+          gap: '0.5rem',
+          marginBottom: '0.5rem'
         }}>
           <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           <span style={{ color: '#94a3b8', fontSize: '0.875rem' }}>or</span>
@@ -300,8 +325,7 @@ const Login = () => {
         {/* Register Link */}
         <div style={{
           textAlign: 'center',
-          paddingTop: '0.5 rem',
-          
+          paddingTop: '0.5rem',
         }}>
           <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0 0 1rem 0' }}>
             Don't have an account?{' '}
@@ -315,10 +339,6 @@ const Login = () => {
             </a>
           </p>
         </div>
-
-       
-
-
       </div>
     </div>
   );
