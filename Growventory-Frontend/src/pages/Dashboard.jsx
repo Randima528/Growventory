@@ -3,7 +3,72 @@ import { Package, AlertCircle, DollarSign, ShoppingCart } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import api from '../../services/api';
 
+
+// Responsive CSS and Sidebar Toggle Logic
+const dashboardResponsiveStyles = `
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column !important;
+      display: flex !important;
+    }
+
+    .sidebar-wrapper {
+      width: 100% !important;
+      display: none;
+
+    }
+
+    .sidebar-wrapper.active {
+      display: block !important;
+    }
+
+    .hamburger-btn {
+      display: flex !important;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 1.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .dashboard-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+    }
+
+    .dashboard-main {
+      padding: 1rem !important;
+    }
+
+    table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+  }
+`;
+
+if (typeof document !== 'undefined' && !document.getElementById('dashboard-responsive-style')) {
+  const style = document.createElement('style');
+  style.id = 'dashboard-responsive-style';
+  style.innerHTML = dashboardResponsiveStyles;
+  document.head.appendChild(style);
+}
+
+
 const Dashboard = () => {
+
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,24 +161,38 @@ const Dashboard = () => {
   const { metrics, lowStockProducts, outOfStockProducts, topProducts } = dashboardData;
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '250px 1fr',
-      minHeight: '100vh',
-      background: '#f8fafc'
-    }}>
-      <Sidebar activeItem="dashboard" />
+    <div className="dashboard-container" style={{
+    display: 'grid',
+    gridTemplateColumns: '250px 1fr',
+    minHeight: '100vh',
+    background: '#f8fafc'
+  }}>
+      <Sidebar
+  activeItem="dashboard"
+  className={`sidebar-wrapper ${sidebarOpen ? 'active' : ''}`}
+/>
 
-      <div style={{ padding: '2rem', overflowY: 'auto' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          paddingBottom: '1rem',
-          borderBottom: '1px solid #e2e8f0'
-        }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Dashboard</h1>
+
+
+      <div className="dashboard-main" style={{ padding: '2rem', overflowY: 'auto' }}>
+        <div className="dashboard-header" style={{
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '2rem',
+  paddingBottom: '1rem',
+  borderBottom: '1px solid #e2e8f0'
+}}>
+  <button 
+    className="hamburger-btn"
+    onClick={toggleSidebar}
+    style={{ display: 'none' }}
+  >
+  ☰
+  </button>
+
+  <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>Dashboard</h1>
+
           <button 
             onClick={fetchDashboardData}
             style={{
