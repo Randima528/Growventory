@@ -15,7 +15,67 @@ import { debounce } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
+// Responsive CSS and Sidebar Toggle Logic
+const productListResponsiveStyles = `
+  @media (max-width: 768px) {
+    .app-layout {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .sidebar-wrapper {
+      display: none;
+      width: 100% !important;
+    }
+
+    .sidebar-wrapper.active {
+      display: block !important;
+    }
+
+    .hamburger-btn {
+      display: flex !important;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 1.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .page-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+    }
+
+    table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .main-content {
+      padding: 1rem !important;
+    }
+  }
+`;
+
+if (typeof document !== 'undefined' && !document.getElementById('productlist-responsive-style')) {
+  const style = document.createElement('style');
+  style.id = 'productlist-responsive-style';
+  style.innerHTML = productListResponsiveStyles;
+  document.head.appendChild(style);
+}
+
+
 const ProductList = () => {
+
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   const navigate = useNavigate();
 
   const [currentProduct, setCurrentProduct] = useState(null);
@@ -124,11 +184,22 @@ const ProductList = () => {
 
   return (
     <div className="app-layout">
-      <Sidebar activeItem="products" />
+      <Sidebar
+        activeItem="products"
+        className={`sidebar-wrapper ${sidebarOpen ? "active" : ""}`}
+      />
       <div className="main-content">
-        <div className="page-header">
-          <h1 className="page-title">All Products</h1>
-        </div>
+        <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "1rem" }}>
+  <button
+    className="hamburger-btn"
+    onClick={toggleSidebar}
+    style={{ display: "none" }}
+  >
+    ☰
+  </button>
+  <h1 className="page-title" style={{ fontSize: "2rem", fontWeight: "700" }}>All Products</h1>
+</div>
+
         <div className="search-filters flex justify-end items-center">
           <div className="relative">
             <input
