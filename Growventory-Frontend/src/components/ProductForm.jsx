@@ -4,7 +4,61 @@ import Sidebar from "./Sidebar";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
+// Responsive CSS & Sidebar Toggle Logic
+const addProductResponsiveStyles = `
+  @media (max-width: 768px) {
+    .app-layout {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .sidebar-wrapper {
+      display: none;
+      width: 100% !important;
+    }
+
+    .sidebar-wrapper.active {
+      display: block !important;
+    }
+
+    .hamburger-btn {
+      display: flex !important;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 1.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .page-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+    }
+
+    .main-content {
+      padding: 1rem !important;
+    }
+  }
+`;
+
+if (typeof document !== 'undefined' && !document.getElementById('addproduct-responsive-style')) {
+  const style = document.createElement('style');
+  style.id = 'addproduct-responsive-style';
+  style.innerHTML = addProductResponsiveStyles;
+  document.head.appendChild(style);
+}
+
+
 const ProductForm = () => {
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   const navigate = useNavigate();
   const [product, setProduct] = useState({
     name: "",
@@ -34,11 +88,36 @@ const ProductForm = () => {
 
   return (
     <div className="app-layout">
-      <Sidebar activeItem="addProduct" />
+      <Sidebar
+  activeItem="addProduct"
+  className={`sidebar-wrapper ${sidebarOpen ? "active" : ""}`}
+/>
+
       <div className="main-content">
-        <div className="page-header">
-          <h1 className="page-title">Add Product</h1>
-        </div>
+        
+        <div
+  className="page-header"
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "1.5rem",
+    borderBottom: "1px solid #e2e8f0",
+    paddingBottom: "1rem",
+  }}
+>
+  <button
+    className="hamburger-btn"
+    onClick={toggleSidebar}
+    style={{ display: "none" }}
+  >
+    ☰
+  </button>
+  <h1 className="page-title" style={{ fontSize: "2rem", fontWeight: "700" }}>
+    Add Product
+  </h1>
+</div>
+
         <div className="card">
           <div className="card-header">
             <h2 className="text-lg  text-gray-700 font-bold">
