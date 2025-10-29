@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, CheckCircle, AlertCircle } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,7 +56,7 @@ const Register = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -63,17 +65,38 @@ const Register = () => {
 
     setLoading(true);
 
-    setTimeout(() => {
-      setSuccess('✓ Account created successfully! Redirecting to dashboard...');
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
+    try {
+      const response = await api.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
       });
-      setPasswordStrength(0);
+
+      if (response.message === "User registered successfully") {
+        setSuccess('✓ Account created successfully! Redirecting to login...');
+        
+        // Clear form
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+        setPasswordStrength(0);
+
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else if (response.message) {
+        setError(response.message);
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('An error occurred during registration. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const getPasswordStrengthText = () => {
@@ -169,7 +192,7 @@ const Register = () => {
         )}
 
         {/* Form */}
-        <div onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           {/* Full Name Field */}
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{
@@ -200,6 +223,7 @@ const Register = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="John Doe"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 0.75rem 0.75rem 2.75rem',
@@ -246,6 +270,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="you@example.com"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 0.75rem 0.75rem 2.75rem',
@@ -292,6 +317,7 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="At least 6 characters"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 2.75rem 0.75rem 2.75rem',
@@ -382,6 +408,7 @@ const Register = () => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm your password"
+                required
                 style={{
                   width: '100%',
                   padding: '0.75rem 2.75rem 0.75rem 2.75rem',
@@ -455,7 +482,7 @@ const Register = () => {
 
           {/* Register Button */}
           <button
-            onClick={handleSubmit}
+            type="submit"
             disabled={loading}
             style={{
               width: '100%',
@@ -475,7 +502,7 @@ const Register = () => {
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
-        </div>
+        </form>
 
         {/* Login Link */}
         <div style={{
@@ -486,20 +513,16 @@ const Register = () => {
         }}>
           <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0' }}>
             Already have an account?{' '}
-            <a href="/login">
-            <span style={{
+            <a href="/login" style={{
               color: '#1c6426',
               fontWeight: '700',
+              textDecoration: 'none',
               cursor: 'pointer'
             }}>
-                
               Login here
-            </span>
             </a>
           </p>
         </div>
-
-
       </div>
     </div>
   );
