@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 
-const Sidebar = ({ activeItem }) => {
+const Sidebar = ({ activeItem, className = "" }) => {
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${className}`}>
       <div className="sidebar-logo">🌱Growventory</div>
       <ul className="sidebar-nav">
         <li>
