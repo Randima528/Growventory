@@ -295,6 +295,7 @@ body {
   background: #1c6426;
   color: white;
   padding: 2rem;
+  
 }
 
 .sidebar-logo {
@@ -423,7 +424,8 @@ body {
   }
 
   .sidebar {
-    display: none;
+    min-height: auto;
+    height: auto;     
   }
 
   .components-grid {
